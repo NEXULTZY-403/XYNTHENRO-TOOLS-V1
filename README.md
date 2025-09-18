@@ -20,8 +20,8 @@ pkg install python3
 
 ### Usage Tool
 ```
-git clone https://github.com/tzynexul-ui/XYNTHENRO-X-TOOLS
-cd XYNTHENRO-X-TOOLS
+git clone https://github.com/NEXULTZY-403/XYNTHENRO-TOOLS-V1
+cd XYNTHENRO-TOOLS-V1
 pip3 install -r requirements.txt
 python3 suki.py
 ```
